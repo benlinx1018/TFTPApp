@@ -52,11 +52,8 @@ public class MainActivity extends AppCompatActivity {
         setSelectFile(selectedFile);
 
 
-
         //檢查Wifi 取得IP
         checkWifi();
-
-
 
 
     }
@@ -67,6 +64,8 @@ public class MainActivity extends AppCompatActivity {
         try {
             if (selectedFile.exists()) {
                 FileUtils.copyFileToDirectory(selectedFile, serverFolder);
+            } else {
+                Toast.makeText(MainActivity.this, "Not Select valid file", Toast.LENGTH_SHORT).show();
             }
             tftpServer = new TFTPServer(serverFolder, serverFolder, getPort(), TFTPServer.ServerMode.GET_AND_PUT);
 
@@ -77,7 +76,8 @@ public class MainActivity extends AppCompatActivity {
         }
         tftpServer.run();
     }
-    private void stop()  {
+
+    private void stop() {
 
         try {
             tftpServer.finalize();
@@ -89,29 +89,30 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void CreateServerFolder() {
-        serverFolder= new File(Environment.getExternalStorageDirectory() + "/tftp");
+        serverFolder = new File(Environment.getExternalStorageDirectory() + "/tftp");
         try {
             if (serverFolder.exists())
                 FileUtils.forceDelete(serverFolder);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        if(!serverFolder.mkdir())
-            {
-                Toast.makeText(MainActivity.this, "Can not Creat ServerFolder", Toast.LENGTH_SHORT).show();
-            }
+        if (!serverFolder.mkdir()) {
+            Toast.makeText(MainActivity.this, "Can not Creat ServerFolder", Toast.LENGTH_SHORT).show();
+        }
 
     }
-    private void setDefaultFile(){
+
+    private void setDefaultFile() {
         try {
             InputStream is = getAssets().open("unicorn.5511mp1.cala-d3.pc15.1609.1-9.36.2012.cpr");
-            selectedFile= new File(Environment.getExternalStorageDirectory(),"Unicorn.5511mp1.CALA-D3.PC15.1609.1-9.36.2012.cpr");
-            FileUtils.copyToFile(is,selectedFile);
+            selectedFile = new File(Environment.getExternalStorageDirectory(), "Unicorn.5511mp1.CALA-D3.PC15.1609.1-9.36.2012.cpr");
+            FileUtils.copyToFile(is, selectedFile);
             setSelectFile(selectedFile);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
     private String GetSDPath() {
         File sdPath = null;
         if (Environment.getExternalStorageState().equals(
@@ -133,11 +134,11 @@ public class MainActivity extends AppCompatActivity {
                 if (isRun) {
                     stop();
                     btnRun.setText("RUN TFTP");
-                    isRun=false;
+                    isRun = false;
                 } else {
                     run();
                     btnRun.setText("STOP TFTP");
-                    isRun=true;
+                    isRun = true;
                 }
             }
         });
@@ -198,7 +199,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
     private void setPort(int port) {
         editPort.setText(String.valueOf(port), TextView.BufferType.EDITABLE);
     }
@@ -206,8 +206,6 @@ public class MainActivity extends AppCompatActivity {
     private int getPort() {
         return Integer.parseInt(editPort.getText().toString());
     }
-
-
 
 
 }
