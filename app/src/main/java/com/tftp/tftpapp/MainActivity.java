@@ -63,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
             tftpServer = new TFTPServer(serverFolder, serverFolder, getPort(), TFTPServer.ServerMode.GET_AND_PUT);
 
             tftpServer.setSocketTimeout(600000);
-            copyFile(selectedFile, serverFolder);
+            copyFile(selectedFile, new File(serverFolder,selectedFile.getName()));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -78,7 +78,10 @@ public class MainActivity extends AppCompatActivity {
         File direct = new File(Environment.getExternalStorageDirectory() + "/tftp");
 
         if (!direct.exists()) {
-            direct.mkdir();
+           if(!direct.mkdir())
+           {
+               Toast.makeText(MainActivity.this, "Can not Creat ServerFolder", Toast.LENGTH_SHORT).show();
+           }
 
         }
         return direct;
@@ -103,12 +106,13 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (isRun) {
-
-                    run();
-                    btnRun.setText("STOP TFTP");
-                } else {
                     stop();
                     btnRun.setText("RUN TFTP");
+
+                } else {
+                    run();
+                    btnRun.setText("STOP TFTP");
+
                 }
             }
         });
