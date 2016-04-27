@@ -69,9 +69,14 @@ public class MainActivity extends AppCompatActivity {
         }
         tftpServer.run();
     }
-    private void stop() {
+    private void stop()  {
+
+        try {
+            tftpServer.finalize();
+        } catch (Throwable throwable) {
+            throwable.printStackTrace();
+        }
         serverFolder.deleteOnExit();
-        tftpServer.shutdown();
     }
 
     private File CreateServerFolder() {
