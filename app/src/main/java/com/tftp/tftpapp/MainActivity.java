@@ -14,7 +14,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.obsez.android.lib.filechooser.ChooserDialog;
+import com.obsez.android.lib.filechooser.internals.FileUtil;
 
+import org.apache.commons.io.FileUtils;
 import org.w3c.dom.Text;
 
 import java.io.File;
@@ -43,9 +45,12 @@ public class MainActivity extends AppCompatActivity {
         STORGE_PATH = "/storage/sdcard0";
         findview();
 
+
         setPort(1069);
-        //取得預設檔案:Unicorn.5511mp1.CALA-D3.PC15.1609.1-9.36.2012.cpr
-        LoadDefaultFile();
+
+        setDefaultFile();
+        setSelectFile(selectedFile);
+
 
 
         //檢查Wifi 取得IP
@@ -57,13 +62,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void run() {
-        //建立檢查ServerFolder
-        serverFolder = CreateServerFolder();
+
+        CreateServerFolder();
         try {
+            if (selectedFile.exists()) {
+                FileUtils.copyFileToDirectory(selectedFile, serverFolder);
+            }
             tftpServer = new TFTPServer(serverFolder, serverFolder, getPort(), TFTPServer.ServerMode.GET_AND_PUT);
 
             tftpServer.setSocketTimeout(600000);
-            copyFile(selectedFile, new File(serverFolder,selectedFile.getName()));
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -73,25 +81,37 @@ public class MainActivity extends AppCompatActivity {
 
         try {
             tftpServer.finalize();
+            FileUtils.forceDelete(serverFolder);
         } catch (Throwable throwable) {
             throwable.printStackTrace();
         }
-        serverFolder.deleteOnExit();
+
     }
 
-    private File CreateServerFolder() {
-        File direct = new File(Environment.getExternalStorageDirectory() + "/tftp");
-
-        if (!direct.exists()) {
-           if(!direct.mkdir())
-           {
-               Toast.makeText(MainActivity.this, "Can not Creat ServerFolder", Toast.LENGTH_SHORT).show();
-           }
-
+    private void CreateServerFolder() {
+        serverFolder= new File(Environment.getExternalStorageDirectory() + "/tftp");
+        try {
+            if (serverFolder.exists())
+                FileUtils.forceDelete(serverFolder);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        return direct;
-    }
+        if(!serverFolder.mkdir())
+            {
+                Toast.makeText(MainActivity.this, "Can not Creat ServerFolder", Toast.LENGTH_SHORT).show();
+            }
 
+    }
+    private void setDefaultFile(){
+        try {
+            InputStream is = getAssets().open("unicorn.5511mp1.cala-d3.pc15.1609.1-9.36.2012.cpr");
+            selectedFile= new File(Environment.getExternalStorageDirectory(),"Unicorn.5511mp1.CALA-D3.PC15.1609.1-9.36.2012.cpr");
+            FileUtils.copyToFile(is,selectedFile);
+            setSelectFile(selectedFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
     private String GetSDPath() {
         File sdPath = null;
         if (Environment.getExternalStorageState().equals(
@@ -113,11 +133,11 @@ public class MainActivity extends AppCompatActivity {
                 if (isRun) {
                     stop();
                     btnRun.setText("RUN TFTP");
-
+                    isRun=false;
                 } else {
                     run();
                     btnRun.setText("STOP TFTP");
-
+                    isRun=true;
                 }
             }
         });
@@ -150,7 +170,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onChoosePath(String path, File pathFile) {
                         Toast.makeText(MainActivity.this, "FILE: " + path, Toast.LENGTH_SHORT).show();
-                        selectedFile = pathFile;
+                        setSelectFile(pathFile);
                     }
                 })
                 .build()
@@ -177,22 +197,7 @@ public class MainActivity extends AppCompatActivity {
         return false;
     }
 
-    private void LoadDefaultFile() {
-        try {
-            File defaultFile = File.createTempFile("Unicorn.5511mp1.CALA-D3.PC15.1609.1-9.36.2012", ".cpr");
 
-
-            InputStream is = getAssets().open("unicorn.5511mp1.cala-d3.pc15.1609.1-9.36.2012.cpr");
-            copyInputStreamToFile(is, defaultFile);
-
-
-            setSelectFile(defaultFile);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-
-    }
 
     private void setPort(int port) {
         editPort.setText(String.valueOf(port), TextView.BufferType.EDITABLE);
@@ -202,68 +207,7 @@ public class MainActivity extends AppCompatActivity {
         return Integer.parseInt(editPort.getText().toString());
     }
 
-    private void copyInputStreamToFile(InputStream in, File file) {
-        try {
-            OutputStream out = new FileOutputStream(file);
-            byte[] buf = new byte[1024];
-            int len;
-            while ((len = in.read(buf)) > 0) {
-                out.write(buf, 0, len);
-            }
-            out.close();
-            in.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 
-    public static void copyFileOrDirectory(String srcDir, String dstDir) {
 
-        try {
-            File src = new File(srcDir);
-            File dst = new File(dstDir, src.getName());
-
-            if (src.isDirectory()) {
-
-                String files[] = src.list();
-                int filesLength = files.length;
-                for (int i = 0; i < filesLength; i++) {
-                    String src1 = (new File(src, files[i]).getPath());
-                    String dst1 = dst.getPath();
-                    copyFileOrDirectory(src1, dst1);
-
-                }
-            } else {
-                copyFile(src, dst);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void copyFile(File sourceFile, File destFile) throws IOException {
-        if (!destFile.getParentFile().exists())
-            destFile.getParentFile().mkdirs();
-
-        if (!destFile.exists()) {
-            destFile.createNewFile();
-        }
-
-        FileChannel source = null;
-        FileChannel destination = null;
-
-        try {
-            source = new FileInputStream(sourceFile).getChannel();
-            destination = new FileOutputStream(destFile).getChannel();
-            destination.transferFrom(source, 0, source.size());
-        } finally {
-            if (source != null) {
-                source.close();
-            }
-            if (destination != null) {
-                destination.close();
-            }
-        }
-    }
 
 }
