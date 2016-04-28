@@ -3,10 +3,12 @@ package com.tftp.tftpapp;
 import android.content.Context;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.os.AsyncTask;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.format.Formatter;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -34,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
     private EditText editPort;
     private File selectedFile, serverFolder;
     private TFTPServer tftpServer;
-    private Thread thread;
+    private TFTPTask tftpTask;
     private boolean isRun = false;
 
     @Override
@@ -69,21 +71,37 @@ public class MainActivity extends AppCompatActivity {
             }
             tftpServer = new TFTPServer(serverFolder, serverFolder, getPort(), TFTPServer.ServerMode.GET_AND_PUT);
 
-            tftpServer.setSocketTimeout(600000);
 
+            tftpServer.setSocketTimeout(600000);
+            tftpServer.setMaxTimeoutRetries(5);
+
+
+            tftpTask = new TFTPTask();
+            tftpTask.execute();
         } catch (Exception e) {
             e.printStackTrace();
         }
-        //tftpServer.run();
-        thread = new Thread(tftpServer);
-        thread.run();
-    }
 
+    }
+    private class TFTPTask extends AsyncTask<Integer, Void, String> {
+        protected String doInBackground(Integer... urls) {
+            tftpServer.run();
+            return "SUCCESS";
+        }
+
+        protected void onProgressUpdate(Integer... progress) {
+
+        }
+
+        protected void onPostExecute(Long result) {
+
+        }
+    }
     private void stop() {
 
         try {
             tftpServer.shutdown();
-           thread.interrupt();
+            tftpTask.cancel(true);
             FileUtils.forceDelete(serverFolder);
         } catch (Throwable throwable) {
             throwable.printStackTrace();

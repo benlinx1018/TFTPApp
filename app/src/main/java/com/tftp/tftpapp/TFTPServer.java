@@ -1,5 +1,7 @@
 package com.tftp.tftpapp;
 
+import android.util.Log;
+
 import org.apache.commons.net.io.FromNetASCIIOutputStream;
 import org.apache.commons.net.io.ToNetASCIIInputStream;
 import org.apache.commons.net.tftp.TFTP;
@@ -76,36 +78,53 @@ public class TFTPServer implements Runnable
     //private static final int DEFAULT_TFTP_PORT = 69;
     public static enum ServerMode { GET_ONLY, PUT_ONLY, GET_AND_PUT; }
 
-    private HashSet<TFTPTransfer> transfers_ = new HashSet<TFTPTransfer>();
+    private final HashSet<TFTPTransfer> transfers_ = new HashSet<TFTPTransfer>();
     private volatile boolean shutdownServer = false;
     private TFTP serverTftp_;
     private File serverReadDirectory_;
     private File serverWriteDirectory_;
-    private int port_;
+    private final int port_;
     private Exception serverException = null;
-    private ServerMode mode_;
+    private final ServerMode mode_;
 
     /* /dev/null output stream (default) */
-    private static final PrintStream nullStream = new PrintStream(
-            new OutputStream() {
-                @Override
-                public void write(int b){}
-                @Override
-                public void write(byte[] b) throws IOException {}
-            }
-    );
+//    private static final PrintStream nullStream = new PrintStream(
+//            new OutputStream() {
+//                @Override
+//                public void write(int b){}
+//                @Override
+//                public void write(byte[] b) throws IOException {
+//                    Log.e("TFTP,",b); }
+//            }
+//    );
 
     // don't have access to a logger api, so we will log to these streams, which
     // by default are set to a no-op logger
-    private PrintStream log_;
-    private PrintStream logError_;
+    //private PrintStream log_;
+    //private PrintStream logError_;
 
     private int maxTimeoutRetries_ = 3;
     private int socketTimeout_;
     private Thread serverThread;
 
 
-
+    /**
+     * Start a TFTP Server on the default port (69). Gets and Puts occur in the specified
+     * directories.
+     *
+     * The server will start in another thread, allowing this constructor to return immediately.
+     *
+     * If a get or a put comes in with a relative path that tries to get outside of the
+     * serverDirectory, then the get or put will be denied.
+     *
+     * GET_ONLY mode only allows gets, PUT_ONLY mode only allows puts, and GET_AND_PUT allows both.
+     * Modes are defined as int constants in this class.
+     *
+     * @param serverReadDirectory directory for GET requests
+     * @param serverWriteDirectory directory for PUT requests
+     * @param mode A value as specified above.
+     * @throws IOException if the server directory is invalid or does not exist.
+     */
     public TFTPServer(File serverReadDirectory, File serverWriteDirectory,int port, ServerMode mode)
             throws IOException
     {
@@ -135,8 +154,8 @@ public class TFTPServer implements Runnable
     {
         port_ = port;
         mode_ = mode;
-        log_ = (log == null ? nullStream: log);
-        logError_ = (errorLog == null ? nullStream : errorLog);
+       // log_ = (log == null ? nullStream: log);
+       // logError_ = (errorLog == null ? nullStream : errorLog);
         launch(serverReadDirectory, serverWriteDirectory);
     }
 
@@ -189,10 +208,12 @@ public class TFTPServer implements Runnable
      */
     private void launch(File serverReadDirectory, File serverWriteDirectory) throws IOException
     {
-        log_.println("Starting TFTP Server on port " + port_ + ".  Read directory: "
+//        log_.println("Starting TFTP Server on port " + port_ + ".  Read directory: "
+//                + serverReadDirectory + " Write directory: " + serverWriteDirectory
+//                + " Server Mode is " + mode_);
+        Log.i("TFTP","Starting TFTP Server on port " + port_ + ".  Read directory: "
                 + serverReadDirectory + " Write directory: " + serverWriteDirectory
                 + " Server Mode is " + mode_);
-
         serverReadDirectory_ = serverReadDirectory.getCanonicalFile();
         if (!serverReadDirectory_.exists() || !serverReadDirectory.isDirectory())
         {
@@ -244,6 +265,7 @@ public class TFTPServer implements Runnable
         return !shutdownServer;
     }
 
+    //    @Override
     public void run()
     {
         try
@@ -270,7 +292,9 @@ public class TFTPServer implements Runnable
             if (!shutdownServer)
             {
                 serverException = e;
-                logError_.println("Unexpected Error in TFTP Server - Server shut down! + " + e);
+                //logError_.println("Unexpected Error in TFTP Server - Server shut down! + " + e);
+                Log.e("TFTP","Unexpected Error in TFTP Server - Server shut down! + ",e);
+
             }
         }
         finally
@@ -321,7 +345,7 @@ public class TFTPServer implements Runnable
      */
     private class TFTPTransfer implements Runnable
     {
-        private TFTPPacket tftpPacket_;
+        private final TFTPPacket tftpPacket_;
 
         private boolean shutdownTransfer = false;
 
@@ -345,6 +369,7 @@ public class TFTPServer implements Runnable
             }
         }
 
+        //        @Override
         public void run()
         {
             try
@@ -366,16 +391,19 @@ public class TFTPServer implements Runnable
                 }
                 else
                 {
-                    log_.println("Unsupported TFTP request (" + tftpPacket_ + ") - ignored.");
+                   // log_.println("Unsupported TFTP request (" + tftpPacket_ + ") - ignored.");
+                    Log.i("TFTP","Unsupported TFTP request (\" + tftpPacket_ + \") - ignored.");
                 }
             }
             catch (Exception e)
             {
                 if (!shutdownTransfer)
                 {
-                    logError_
-                            .println("Unexpected Error in during TFTP file transfer.  Transfer aborted. "
-                                    + e);
+//                    logError_
+//                            .println("Unexpected Error in during TFTP file transfer.  Transfer aborted. "
+//                                    + e);
+                    Log.e("TFTP","Unexpected Error in during TFTP file transfer.  Transfer aborted. "
+                            + e);
                 }
             }
             finally
@@ -480,7 +508,8 @@ public class TFTPServer implements Runnable
                             // The answer that we got didn't come from the
                             // expected source, fire back an error, and continue
                             // listening.
-                            log_.println("TFTP Server ignoring message from unexpected source.");
+                            //log_.println("TFTP Server ignoring message from unexpected source.");
+                            Log.i("TFTP","TFTP Server ignoring message from unexpected source. ");
                             transferTftp_.bufferedSend(new TFTPErrorPacket(answer.getAddress(),
                                     answer.getPort(), TFTPErrorPacket.UNKNOWN_TID,
                                     "Unexpected Host or Port"));
@@ -507,9 +536,11 @@ public class TFTPServer implements Runnable
                     {
                         if (!shutdownTransfer)
                         {
-                            logError_
-                                    .println("Unexpected response from tftp client during transfer ("
-                                            + answer + ").  Transfer aborted.");
+//                            logError_
+//                                    .println("Unexpected response from tftp client during transfer ("
+//                                            + answer + ").  Transfer aborted.");
+                            Log.e("TFTP","Unexpected response from tftp client during transfer ("
+                                    + answer + ").  Transfer aborted.");
                         }
                         break;
                     }
@@ -624,7 +655,8 @@ public class TFTPServer implements Runnable
                             // The data that we got didn't come from the
                             // expected source, fire back an error, and continue
                             // listening.
-                            log_.println("TFTP Server ignoring message from unexpected source.");
+                            //log_.println("TFTP Server ignoring message from unexpected source.");
+                            Log.e("TFTP","TFTP Server ignoring message from unexpected source.");
                             transferTftp_.bufferedSend(new TFTPErrorPacket(dataPacket.getAddress(),
                                     dataPacket.getPort(), TFTPErrorPacket.UNKNOWN_TID,
                                     "Unexpected Host or Port"));
@@ -657,9 +689,11 @@ public class TFTPServer implements Runnable
                     {
                         if (!shutdownTransfer)
                         {
-                            logError_
-                                    .println("Unexpected response from tftp client during transfer ("
-                                            + dataPacket + ").  Transfer aborted.");
+//                            logError_
+//                                    .println("Unexpected response from tftp client during transfer ("
+//                                            + dataPacket + ").  Transfer aborted.");
+                            Log.e("TFTP","Unexpected response from tftp client during transfer ("
+                                    + dataPacket + ").  Transfer aborted.");
                         }
                         break;
                     }
@@ -820,19 +854,20 @@ public class TFTPServer implements Runnable
      *
      * @param log
      */
-    public void setLog(PrintStream log)
-    {
-        this.log_ = log;
-    }
-
-    /**
-     * Set the stream object to log error messsages. By default, this is a no-op
-     *
-     * @param logError
-     */
-    public void setLogError(PrintStream logError)
-    {
-        this.logError_ = logError;
-    }
+//    public void setLog(PrintStream log)
+//    {
+//        this.log_ = log;
+//    }
+//
+//    /**
+//     * Set the stream object to log error messsages. By default, this is a no-op
+//     *
+//     * @param logError
+//     */
+//    public void setLogError(PrintStream logError)
+//    {
+//        this.logError_ = logError;
+//    }
 }
+
 
