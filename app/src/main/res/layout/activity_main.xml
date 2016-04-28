@@ -104,7 +104,19 @@
         android:text="Run TFTP"
         android:textColor="@android:color/white"
         android:textSize="18sp" />
-
+    <Button
+        android:id="@+id/btnGOSNMP"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
+        android:background="@drawable/fbutton"
+        android:paddingBottom="8dp"
+        android:paddingLeft="25dp"
+        android:paddingRight="25dp"
+        android:paddingTop="8dp"
+        android:text="SET SNMP "
+        android:textColor="@android:color/white"
+        android:textSize="18sp" />
 
 
 </LinearLayout>

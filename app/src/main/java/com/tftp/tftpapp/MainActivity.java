@@ -1,6 +1,7 @@
 package com.tftp.tftpapp;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
@@ -38,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
     private TFTPServer tftpServer;
     private TFTPTask tftpTask;
     private boolean isRun = false;
-
+    private String IP = "0.0.0.0";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -178,6 +179,15 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+        Button btnGOSNMP= (Button)findViewById(R.id.btnGOSNMP);
+        btnGOSNMP.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i =new Intent(MainActivity.this, SNMPActivity.class);
+                i.putExtra("IP",IP);
+                startActivity(i);
+            }
+        });
     }
 
     private void setSelectFile(File file) {
@@ -206,8 +216,8 @@ public class MainActivity extends AppCompatActivity {
                 WifiInfo connectedWifiInfo = wifiManager.getConnectionInfo();
                 if (connectedWifiInfo != null) {
                     if (connectedWifiInfo.getBSSID() != null) {
-                        String s = Formatter.formatIpAddress(connectedWifiInfo.getIpAddress());
-                        txtWifi.setText("Wifi Address:" + s);
+                        IP= Formatter.formatIpAddress(connectedWifiInfo.getIpAddress());
+                        txtWifi.setText("Wifi Address:" + IP);
                         return true;
                     }
 
