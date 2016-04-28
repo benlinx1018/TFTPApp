@@ -32,7 +32,7 @@ import org.snmp4j.transport.DefaultUdpTransportMapping;
 
 public class SNMPActivity extends AppCompatActivity {
     private static final String TAG = "SNMP CLIENT";
-    private static String ipAddress = "192.168.2.1";
+    private static String ipAddress = "192.168.100.1";
     private static final String port = "161";
 
     private static final String OIDVALUE = "1.3.6.1.4.1.0";
