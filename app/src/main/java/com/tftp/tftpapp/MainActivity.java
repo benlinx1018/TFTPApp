@@ -34,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
     private EditText editPort;
     private File selectedFile, serverFolder;
     private TFTPServer tftpServer;
-
+    private Thread thread;
     private boolean isRun = false;
 
     @Override
@@ -74,13 +74,16 @@ public class MainActivity extends AppCompatActivity {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        tftpServer.run();
+        //tftpServer.run();
+        thread = new Thread(tftpServer);
+        thread.run();
     }
 
     private void stop() {
 
         try {
-            tftpServer.finalize();
+            tftpServer.shutdown();
+           thread.interrupt();
             FileUtils.forceDelete(serverFolder);
         } catch (Throwable throwable) {
             throwable.printStackTrace();
