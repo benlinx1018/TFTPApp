@@ -80,19 +80,19 @@ public class SNMPActivity extends AppCompatActivity {
     private void sendSnmpRequest(OID oid, AbstractVariable variable, int pduType) throws Exception {
         // Create TransportMapping and Listen
 
-
+        Log.d(TAG, "Create Target Address object");
+        logResult.append("\nCreate Target Address object\n");
         TransportMapping<UdpAddress> transport = new DefaultUdpTransportMapping();
         transport.listen();
 
-        //Log.d(TAG, "Create Target Address object");
-        //logResult.append("Create Target Address object\n");
-        // Create Target Address object
+
+        //Create Target Address object
         CommunityTarget comtarget = new CommunityTarget();
         comtarget.setCommunity(new OctetString(WRITE_COMMUNITY));
         comtarget.setVersion(SNMP_VERSION);
 
-        //Log.d(TAG, "-address: " + ipAddress + "/" + port);
-        //logResult.append("-address: " + ipAddress + "/" + port + "\n");
+        Log.d(TAG, "-address: " + ipAddress + "/" + port);
+        logResult.append("-address: " + ipAddress + "/" + port + "\n");
 
         comtarget.setAddress(new UdpAddress(ipAddress + "/" + port));
         comtarget.setRetries(2);
