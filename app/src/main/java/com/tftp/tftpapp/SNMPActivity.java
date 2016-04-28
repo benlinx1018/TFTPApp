@@ -163,30 +163,30 @@ public class SNMPActivity extends AppCompatActivity {
                 // SET OID_BCM_cdPvtMibEnableKeyValue OCTETSTRING !@#$*&^
                 //1.3.6.1.4.1.4413.2.99.1.1.1.2.1.2.1
                 sendSnmpRequest(new OID("1.3.6.1.4.1.4413.2.99.1.1.1.2.1.2.1"), new OctetString("!@#$*&^"), PDU.SET);
-                wait(2000);
+                Thread.sleep(1000);
 
 
                 // SET OID_v2FwControlImageNumber INTERGER 2
                 //1.3.6.1.4.1.4413.2.99.1.1.2.4.2.2.2.1
                 sendSnmpRequest(new OID("1.3.6.1.4.1.4413.2.99.1.1.2.4.2.2.2.1"), new Integer32(2), PDU.SET);
-                wait(2000);
+                Thread.sleep(1000);
 
 
                 //SET OID_v2FwDloadTftpServer IPADDRESS 192.168.100.3
                 //1.3.6.1.4.1.4413.2.99.1.1.2.4.2.2.2.2
                 sendSnmpRequest(new OID("1.3.6.1.4.1.4413.2.99.1.1.2.4.2.2.2.2"), new IpAddress(tftpIP), PDU.SET);
-                wait(2000);
+                Thread.sleep(1000);
 
 
                 //SET OID_v2FwDloadTftpPath OCTETSTRING UBC1302-U10C111-VCM-B0-4MB-EUTDC-PC15.cpr
                 //1.3.6.1.4.1.4413.2.99.1.1.2.4.2.2.2.3
                 sendSnmpRequest(new OID("1.3.6.1.4.1.4413.2.99.1.1.2.4.2.2.2.3"), new OctetString(FILE_NAME), PDU.SET);
-                wait(2000);
+                Thread.sleep(1000);
 
                 //SET OID_v2FwDloadNow INTERGER 1
                 //1.3.6.1.4.1.4413.2.99.1.1.2.4.2.2.2.6
                 sendSnmpRequest(new OID("1.3.6.1.4.1.4413.2.99.1.1.2.4.2.2.2.6"), new Integer32(1), PDU.SET);
-                wait(2000);
+                Thread.sleep(1000);
             } catch (Exception e) {
                 Log.e(TAG,
                         "Error sending snmp request - Error: " + e.getMessage(), e);
