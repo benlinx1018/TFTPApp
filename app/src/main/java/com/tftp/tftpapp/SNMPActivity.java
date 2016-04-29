@@ -35,8 +35,6 @@ public class SNMPActivity extends AppCompatActivity {
     private static String ipAddress = "192.168.100.1";
     private static final String port = "161";
 
-    private static final String OIDVALUE = "1.3.6.1.4.1.0";
-    private static final int SNMP_VERSION = SnmpConstants.version2c;
     public static final String READ_COMMUNITY = "public";
     public static final String WRITE_COMMUNITY = "private";
     private String FILE_NAME = "Unicorn.5511mp1.CALA-D3.PC15.1609.1-9.36.2012.cpr";
@@ -70,80 +68,54 @@ public class SNMPActivity extends AppCompatActivity {
                     tftpTask = new TFTPTask();
                     tftpTask.execute();
                 } else {
-                    Toast.makeText(getBaseContext(), "Task is Running!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(v.getContext(), "Task is Running!", Toast.LENGTH_SHORT).show();
                 }
             }
         });
         txtLog = (TextView) findViewById(R.id.txtLog);
     }
 
-    private void sendSnmpRequest(OID oid, AbstractVariable variable, int pduType) throws Exception {
+    private void sendSnmpRequest(Snmp snmp,CommunityTarget target,OID oid, AbstractVariable variable, int pduType) throws Exception {
         // Create TransportMapping and Listen
 
-        Log.d(TAG, "Create Target Address object");
-        logResult.append("\nCreate Target Address object\n");
-        TransportMapping<UdpAddress> transport = new DefaultUdpTransportMapping();
-        transport.listen();
-
-
-        //Create Target Address object
-        CommunityTarget comtarget = new CommunityTarget();
-        comtarget.setCommunity(new OctetString(WRITE_COMMUNITY));
-        comtarget.setVersion(SNMP_VERSION);
-
-        Log.d(TAG, "-address: " + ipAddress + "/" + port);
-        logResult.append("-address: " + ipAddress + "/" + port + "\n");
-
-        comtarget.setAddress(new UdpAddress(ipAddress + "/" + port));
-        comtarget.setRetries(2);
-        comtarget.setTimeout(1000);
-
-        Log.d(TAG, "Prepare PDU");
-        logResult.append("Prepare PDU\n");
+        log("Create the PDU");
         // create the PDU
         PDU pdu = new PDU();
+        log("OID:"+oid.toString()+"\nVal:"+variable.toString());
         pdu.add(new VariableBinding(oid, variable));
         pdu.setType(pduType);
-
-
-        Snmp snmp = new Snmp(transport);
-        Log.d(TAG, "Sending Request to Agent...");
-        logResult.append("Sending Request to Agent...\n");
-
-        // send the PDU
-        ResponseEvent rspEvt = snmp.send(pdu, comtarget);
+        log("Sending Request to Agent...");
+        ResponseEvent rspEvt = snmp.send(pdu, target);
 
 
         if (rspEvt != null) {
             PDU response = rspEvt.getResponse();
             if (response != null) {
 
-                String errorStatusText = response.getErrorStatusText();
+
                 if (response.getErrorIndex() == PDU.noError && response.getErrorStatus() == PDU.noError) {
                     VariableBinding vb = (VariableBinding) response.getVariableBindings().firstElement();
                     Variable var = vb.getVariable();
                     if (var.equals(variable)) {//比较返回值和设置值
-                        System.out.println("SET SUCCESS! \n NEW VAL:" + var.toString()+"\n");
+
+                        log("SET SUCCESS !! NEW VAL:" + var.toString());
                     } else {
-                        System.out.println("SET FAIL! \n");
+                        log("SET FAIL !! RESPONSE VAL:"+var.toString());
                     }
                 } else {
-                    String errMSG ="Error:" + response.getErrorStatusText()+"\n";
-                    Log.d(TAG,errMSG);
-                    logResult.append(errMSG);
+
+                    log("Error:" + response.getErrorStatusText());
 
                 }
             } else {
-                Log.d(TAG, "Error: Response PDU is null \n");
-                logResult.append("Error: Response PDU is null \n");
 
+                log("Error: Response PDU is null ");
             }
         } else {
-            Log.d(TAG, "Error: Agent Timeout... \n");
-            logResult.append("Error: Agent Timeout... \n");
 
+            log("Error: Agent Timeout... ");
         }
-        snmp.close();
+        log("\n");
     }
 
     // AsyncTask to do job in background
@@ -154,42 +126,56 @@ public class SNMPActivity extends AppCompatActivity {
             mSpinner.setVisibility(View.VISIBLE);
         }
 
-        ;
+
 
         @Override
         protected Void doInBackground(Void... params) {
             try {
 
-                // SET OID_BCM_cdPvtMibEnableKeyValue OCTETSTRING !@#$*&^
-                //1.3.6.1.4.1.4413.2.99.1.1.1.2.1.2.1
-                sendSnmpRequest(new OID("1.3.6.1.4.1.4413.2.99.1.1.1.2.1.2.1"), new OctetString("!@#$*&^"), PDU.SET);
-                Thread.sleep(1000);
+                log("start send snmp to -address: " + ipAddress + "/" + port);
+                log("Create Target Address object");
+                CommunityTarget target = new CommunityTarget();
+                target.setCommunity(new OctetString(WRITE_COMMUNITY));
+                target.setVersion(SnmpConstants.version2c);
+                target.setAddress(new UdpAddress(ipAddress + "/" + port));
+                target.setRetries(2);
+                target.setTimeout(3000);
+
+                Snmp snmp  = new Snmp(new DefaultUdpTransportMapping());
+
+                log("open snmp listen!\n");
+                snmp.listen();
 
 
-                // SET OID_v2FwControlImageNumber INTERGER 2
-                //1.3.6.1.4.1.4413.2.99.1.1.2.4.2.2.2.1
-                sendSnmpRequest(new OID("1.3.6.1.4.1.4413.2.99.1.1.2.4.2.2.2.1"), new Integer32(2), PDU.SET);
-                Thread.sleep(1000);
+                log("SET OID_BCM_cdPvtMibEnableKeyValue OCTETSTRING !@#$*&^");
 
 
-                //SET OID_v2FwDloadTftpServer IPADDRESS 192.168.100.3
-                //1.3.6.1.4.1.4413.2.99.1.1.2.4.2.2.2.2
-                sendSnmpRequest(new OID("1.3.6.1.4.1.4413.2.99.1.1.2.4.2.2.2.2"), new IpAddress(tftpIP), PDU.SET);
-                Thread.sleep(1000);
+                sendSnmpRequest(snmp,target,new OID("1.3.6.1.4.1.4413.2.99.1.1.1.2.1.2.1"), new OctetString("!@#$*&^"), PDU.SET);
 
 
-                //SET OID_v2FwDloadTftpPath OCTETSTRING UBC1302-U10C111-VCM-B0-4MB-EUTDC-PC15.cpr
-                //1.3.6.1.4.1.4413.2.99.1.1.2.4.2.2.2.3
-                sendSnmpRequest(new OID("1.3.6.1.4.1.4413.2.99.1.1.2.4.2.2.2.3"), new OctetString(FILE_NAME), PDU.SET);
-                Thread.sleep(1000);
+                log("SET OID_v2FwControlImageNumber INTERGER 2");
 
-                //SET OID_v2FwDloadNow INTERGER 1
-                //1.3.6.1.4.1.4413.2.99.1.1.2.4.2.2.2.6
-                sendSnmpRequest(new OID("1.3.6.1.4.1.4413.2.99.1.1.2.4.2.2.2.6"), new Integer32(1), PDU.SET);
-                Thread.sleep(1000);
+                //log("1.3.6.1.4.1.4413.2.99.1.1.2.4.2.2.2.1");
+                sendSnmpRequest(snmp,target,new OID("1.3.6.1.4.1.4413.2.99.1.1.2.4.2.2.2.1"), new Integer32(2), PDU.SET);
+
+
+                log("SET OID_v2FwDloadTftpServer IPADDRESS 192.168.100.3");
+
+                //log("1.3.6.1.4.1.4413.2.99.1.1.2.4.2.2.2.2");
+                sendSnmpRequest(snmp,target,new OID("1.3.6.1.4.1.4413.2.99.1.1.2.4.2.2.2.2"), new IpAddress(tftpIP), PDU.SET);
+
+
+                log("SET OID_v2FwDloadTftpPath OCTETSTRING UBC1302-U10C111-VCM-B0-4MB-EUTDC-PC15.cpr");
+                // log("1.3.6.1.4.1.4413.2.99.1.1.2.4.2.2.2.3");
+                sendSnmpRequest(snmp,target,new OID("1.3.6.1.4.1.4413.2.99.1.1.2.4.2.2.2.3"), new OctetString(FILE_NAME), PDU.SET);
+
+                log("SET OID_v2FwDloadNow INTERGER 1");
+                //log("1.3.6.1.4.1.4413.2.99.1.1.2.4.2.2.2.6");
+                sendSnmpRequest(snmp,target,new OID("1.3.6.1.4.1.4413.2.99.1.1.2.4.2.2.2.6"), new Integer32(1), PDU.SET);
+
+                snmp.close();
             } catch (Exception e) {
-                Log.e(TAG,
-                        "Error sending snmp request - Error: " + e.getMessage(), e);
+                logErr("Error sending snmp request - Error: " + e.getMessage(),e);
             }
             return null;
         }
@@ -200,9 +186,16 @@ public class SNMPActivity extends AppCompatActivity {
             mSpinner.setVisibility(View.GONE);
         }
 
-        ;
+
+
 
     }
-
-    ;
+    private void log(String msg){
+        Log.d(TAG, msg);
+        logResult.append(msg+"\n");
+    }
+    private void logErr(String msg,Exception ex){
+        Log.e(TAG, msg,ex);
+        logResult.append(msg+"\n");
+    }
 }
