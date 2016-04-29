@@ -148,19 +148,16 @@ public class SNMPActivity extends AppCompatActivity {
 
 
                 log("SET OID_BCM_cdPvtMibEnableKeyValue OCTETSTRING !@#$*&^");
-
-
+                //log("1.3.6.1.4.1.4413.2.99.1.1.1.2.1.2.1");
                 sendSnmpRequest(snmp,target,new OID("1.3.6.1.4.1.4413.2.99.1.1.1.2.1.2.1"), new OctetString("!@#$*&^"), PDU.SET);
 
 
                 log("SET OID_v2FwControlImageNumber INTERGER 2");
-
                 //log("1.3.6.1.4.1.4413.2.99.1.1.2.4.2.2.2.1");
                 sendSnmpRequest(snmp,target,new OID("1.3.6.1.4.1.4413.2.99.1.1.2.4.2.2.2.1"), new Integer32(2), PDU.SET);
 
 
                 log("SET OID_v2FwDloadTftpServer IPADDRESS 192.168.100.3");
-
                 //log("1.3.6.1.4.1.4413.2.99.1.1.2.4.2.2.2.2");
                 sendSnmpRequest(snmp,target,new OID("1.3.6.1.4.1.4413.2.99.1.1.2.4.2.2.2.2"), new IpAddress(tftpIP), PDU.SET);
 
