@@ -199,8 +199,8 @@ public class SNMPActivity extends AppCompatActivity {
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public  static  < T >  void executeAsyncTask ( AsyncTask < T ,  ?,  ?> asyncTask , T ...  params )  {
         if ( Build. VERSION . SDK_INT >=  Build . VERSION_CODES . HONEYCOMB )
-            asyncTask . executeOnExecutor ( AsyncTask . THREAD_POOL_EXECUTOR ,  params );
+            asyncTask.executeOnExecutor ( AsyncTask.THREAD_POOL_EXECUTOR ,  params );
         else
-            asyncTask . execute ( params );
+            asyncTask.execute ( params );
     }
 }
