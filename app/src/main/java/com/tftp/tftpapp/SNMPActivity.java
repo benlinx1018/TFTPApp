@@ -1,7 +1,9 @@
 package com.tftp.tftpapp;
 
+import android.annotation.TargetApi;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -65,8 +67,7 @@ public class SNMPActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if (!isSend) {
                     isSend = true;
-                    tftpTask = new TFTPTask();
-                    tftpTask.execute();
+                    executeAsyncTask(new TFTPTask());
                 } else {
                     Toast.makeText(v.getContext(), "Task is Running!", Toast.LENGTH_SHORT).show();
                 }
@@ -157,12 +158,12 @@ public class SNMPActivity extends AppCompatActivity {
                 sendSnmpRequest(snmp,target,new OID("1.3.6.1.4.1.4413.2.99.1.1.2.4.2.2.2.1"), new Integer32(2), PDU.SET);
 
 
-                log("SET OID_v2FwDloadTftpServer IPADDRESS 192.168.100.3");
+                log("SET OID_v2FwDloadTftpServer IPADDRESS "+tftpIP);
                 //log("1.3.6.1.4.1.4413.2.99.1.1.2.4.2.2.2.2");
                 sendSnmpRequest(snmp,target,new OID("1.3.6.1.4.1.4413.2.99.1.1.2.4.2.2.2.2"), new IpAddress(tftpIP), PDU.SET);
 
 
-                log("SET OID_v2FwDloadTftpPath OCTETSTRING UBC1302-U10C111-VCM-B0-4MB-EUTDC-PC15.cpr");
+                log("SET OID_v2FwDloadTftpPath OCTETSTRING "+FILE_NAME);
                 // log("1.3.6.1.4.1.4413.2.99.1.1.2.4.2.2.2.3");
                 sendSnmpRequest(snmp,target,new OID("1.3.6.1.4.1.4413.2.99.1.1.2.4.2.2.2.3"), new OctetString(FILE_NAME), PDU.SET);
 
@@ -194,5 +195,12 @@ public class SNMPActivity extends AppCompatActivity {
     private void logErr(String msg,Exception ex){
         Log.e(TAG, msg,ex);
         logResult.append(msg+"\n");
+    }
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    public  static  < T >  void executeAsyncTask ( AsyncTask < T ,  ?,  ?> asyncTask , T ...  params )  {
+        if ( Build. VERSION . SDK_INT >=  Build . VERSION_CODES . HONEYCOMB )
+            asyncTask . executeOnExecutor ( AsyncTask . THREAD_POOL_EXECUTOR ,  params );
+        else
+            asyncTask . execute ( params );
     }
 }

@@ -31,6 +31,7 @@ import java.io.OutputStream;
 import java.nio.channels.FileChannel;
 
 public class MainActivity extends AppCompatActivity {
+    private static final String TAG = "TFTP SERVER";
     private String STORGE_PATH;
     private String SD_PATH;
     private TextView txtWifi, txtFileName;
@@ -86,6 +87,7 @@ public class MainActivity extends AppCompatActivity {
     }
     private class TFTPTask extends AsyncTask<Integer, Void, String> {
         protected String doInBackground(Integer... urls) {
+            Log.d(TAG,"TFTP SEVER RUN!");
             tftpServer.run();
             return "SUCCESS";
         }
