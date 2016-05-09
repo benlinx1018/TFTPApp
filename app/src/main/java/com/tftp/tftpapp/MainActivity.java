@@ -41,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
     private TFTPTask tftpTask;
     private boolean isRun = false;
     private String IP = "0.0.0.0";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
