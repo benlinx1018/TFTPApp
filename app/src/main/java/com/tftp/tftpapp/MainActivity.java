@@ -189,6 +189,7 @@ public class MainActivity extends AppCompatActivity {
                 Intent i =new Intent(MainActivity.this, SNMPActivity.class);
                 i.putExtra("IP",IP);
                 i.putExtra("PORT",getPort());
+                i.putExtra("FILE",selectedFile.getName());
                 startActivity(i);
             }
         });

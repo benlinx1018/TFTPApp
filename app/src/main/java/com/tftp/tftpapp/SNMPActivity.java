@@ -37,7 +37,7 @@ public class SNMPActivity extends AppCompatActivity {
 
     public static final String READ_COMMUNITY = "public";
     public static final String WRITE_COMMUNITY = "private";
-    private String FILE_NAME = "Unicorn.5511mp1.CALA-D3.PC15.1609.1-9.36.2012.cpr";
+    private String tftpFileName = "Unicorn.5511mp1.CALA-D3.PC15.1609.1-9.36.2012.cpr";
     private String tftpIP;
     private int tftpPort;
     private ProgressBar mSpinner;
@@ -54,7 +54,7 @@ public class SNMPActivity extends AppCompatActivity {
         Intent intent = getIntent();
         tftpIP = intent.getStringExtra("IP");
         tftpPort = intent.getIntExtra("PORT",1069);
-
+        tftpFileName = intent.getStringExtra("FILE");
         findView();
     }
 
@@ -162,11 +162,11 @@ public class SNMPActivity extends AppCompatActivity {
                 sendSnmpRequest(snmp,target,new OID("1.3.6.1.4.1.4413.2.99.1.1.2.4.2.2.2.2.0"), new IpAddress(tftpIP), PDU.SET);
 
 
-                log("SET OID_v2FwDloadTftpPath OCTETSTRING "+FILE_NAME);
+                log("SET OID_v2FwDloadTftpPath OCTETSTRING "+tftpFileName);
                 // log("1.3.6.1.4.1.4413.2.99.1.1.2.4.2.2.2.3");
-                sendSnmpRequest(snmp,target,new OID("1.3.6.1.4.1.4413.2.99.1.1.2.4.2.2.2.3.0"), new OctetString(FILE_NAME), PDU.SET);
+                sendSnmpRequest(snmp,target,new OID("1.3.6.1.4.1.4413.2.99.1.1.2.4.2.2.2.3.0"), new OctetString(tftpFileName), PDU.SET);
 
-                log("SET OID_v2FwDloadNow INTERGER 1069");
+                log("SET OID_v2FwDloadNow INTERGER "+tftpPort);
                 //log("1.3.6.1.4.1.4413.2.99.1.1.2.4.2.2.2.6");
                 sendSnmpRequest(snmp,target,new OID("1.3.6.1.4.1.4413.2.99.1.1.2.4.2.2.2.6.0"), new Integer32(tftpPort), PDU.SET);
 
