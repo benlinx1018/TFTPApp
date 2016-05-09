@@ -38,6 +38,7 @@ public class SNMPActivity extends AppCompatActivity {
     public static final String READ_COMMUNITY = "public";
     public static final String WRITE_COMMUNITY = "private";
     private String tftpFileName = "Unicorn.5511mp1.CALA-D3.PC15.1609.1-9.36.2012.cpr";
+    private String IP;
     private String tftpIP;
     private int tftpPort;
     private ProgressBar mSpinner;
@@ -132,12 +133,12 @@ public class SNMPActivity extends AppCompatActivity {
         protected Void doInBackground(Void... params) {
             try {
 
-                log("start send snmp to -address: " + tftpIP + "/" + tftpPort);
+                log("start send snmp to -address: " + IP + "/" + tftpPort);
                 log("Create Target Address object");
                 CommunityTarget target = new CommunityTarget();
                 target.setCommunity(new OctetString(WRITE_COMMUNITY));
                 target.setVersion(SnmpConstants.version2c);
-                target.setAddress(new UdpAddress(tftpIP + "/" + tftpPort));
+                target.setAddress(new UdpAddress(IP + "/" + tftpPort));
                 target.setRetries(2);
                 target.setTimeout(3000);
 
