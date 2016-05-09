@@ -153,21 +153,21 @@ public class SNMPActivity extends AppCompatActivity {
 
 
                 log("SET OID_v2FwControlImageNumber INTERGER 2");
-                //log("1.3.6.1.4.1.4413.2.99.1.1.2.4.2.2.2.1");
+                //log("1.3.6.1.4.1.4413.2.99.1.1.2.4.2.2.2.1.0");
                 sendSnmpRequest(snmp,target,new OID("1.3.6.1.4.1.4413.2.99.1.1.2.4.2.2.2.1.0"), new Integer32(2), PDU.SET);
 
 
                 log("SET OID_v2FwDloadTftpServer IPADDRESS "+tftpIP);
-                //log("1.3.6.1.4.1.4413.2.99.1.1.2.4.2.2.2.2");
+                //log("1.3.6.1.4.1.4413.2.99.1.1.2.4.2.2.2.2.0");
                 sendSnmpRequest(snmp,target,new OID("1.3.6.1.4.1.4413.2.99.1.1.2.4.2.2.2.2.0"), new IpAddress(tftpIP), PDU.SET);
 
 
                 log("SET OID_v2FwDloadTftpPath OCTETSTRING "+tftpFileName);
-                // log("1.3.6.1.4.1.4413.2.99.1.1.2.4.2.2.2.3");
+                // log("1.3.6.1.4.1.4413.2.99.1.1.2.4.2.2.2.3.0");
                 sendSnmpRequest(snmp,target,new OID("1.3.6.1.4.1.4413.2.99.1.1.2.4.2.2.2.3.0"), new OctetString(tftpFileName), PDU.SET);
 
                 log("SET OID_v2FwDloadNow INTERGER "+tftpPort);
-                //log("1.3.6.1.4.1.4413.2.99.1.1.2.4.2.2.2.6");
+                //log("1.3.6.1.4.1.4413.2.99.1.1.2.4.2.2.2.6.0");
                 sendSnmpRequest(snmp,target,new OID("1.3.6.1.4.1.4413.2.99.1.1.2.4.2.2.2.6.0"), new Integer32(tftpPort), PDU.SET);
 
                 snmp.close();
