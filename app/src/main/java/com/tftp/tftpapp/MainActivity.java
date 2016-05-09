@@ -75,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
 
 
             tftpServer.setSocketTimeout(600000);
-            tftpServer.setMaxTimeoutRetries(5);
+            tftpServer.setMaxTimeoutRetries(10);
 
 
             tftpTask = new TFTPTask();
@@ -128,8 +128,9 @@ public class MainActivity extends AppCompatActivity {
 
     private void setDefaultFile() {
         try {
-            InputStream is = getAssets().open("unicorn.5511mp1.cala-d3.pc15.1609.1-9.36.2012.cpr");
-            selectedFile = new File(Environment.getExternalStorageDirectory(), "Unicorn.5511mp1.CALA-D3.PC15.1609.1-9.36.2012.cpr");
+            InputStream is = getAssets().open("9.36.1013beta_app_upgrade.cpr");
+            //TODO: change Default file name
+            selectedFile = new File(Environment.getExternalStorageDirectory(), "9.36.1013beta_app_upgrade.cpr");
             FileUtils.copyToFile(is, selectedFile);
             setSelectFile(selectedFile);
         } catch (IOException e) {
@@ -187,6 +188,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent i =new Intent(MainActivity.this, SNMPActivity.class);
                 i.putExtra("IP",IP);
+                i.putExtra("PORT",getPort());
                 startActivity(i);
             }
         });

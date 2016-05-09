@@ -27,5 +27,6 @@ dependencies {
     compile 'commons-net:commons-net:3.3'
     compile 'com.obsez.android.lib.filechooser:filechooser:1.1.2'
     compile 'commons-io:commons-io:+'
+    compile 'eu.chainfire:libsuperuser:1.0.0.+'
     compile files('libs/snmp4j-2.4.3.jar')
 }
